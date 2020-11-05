@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import { withRouter } from 'react-router';
+import { connect } from 'react-redux';
+
 import axios from '../../../axios-orders';
 import Button from '../../../components/UI/Button/Button';
 import Input from '../../../components/UI/Input/Input';
@@ -114,7 +116,7 @@ class ContactData extends Component {
         }
 
         const order = {
-            ingredients: this.props.ingredients,
+            ingredients: this.props.ings,
             price: this.props.price,
             orderData: formData,
         };
@@ -122,7 +124,6 @@ class ContactData extends Component {
         axios
             .post('/orders.json', order)
             .then((res) => {
-                console.log(res);
                 this.setState({
                     loading: false,
                 });
@@ -131,7 +132,7 @@ class ContactData extends Component {
             .catch((e) => {
                 console.log(e);
                 this.setState({
-                    loading: true,
+                    loading: false,
                 });
             });
     };
@@ -217,4 +218,12 @@ class ContactData extends Component {
     }
 }
 
-export default withRouter(ContactData);
+const importReduxState = (state) => {
+    //Import state obj set in redux
+    return {
+        ings: state.ingredients,
+        price: state.totalPrice,
+    };
+};
+
+export default connect(importReduxState)(withRouter(ContactData));
