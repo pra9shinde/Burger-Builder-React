@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
+import axios from '../../axios-orders';
 
 // Redux
 import { connect } from 'react-redux';
-import * as actionTypes from '../../redux/actions';
+import * as burgerBuilderActions from '../../redux/actions/index';
 
 // Higher Order Component
 import Aux from '../../hoc/Auxilary/Auxilary';
@@ -14,27 +15,15 @@ import Modal from '../../components/UI/Modal/Modal';
 import OrderSummary from '../../components/Burger/OrderSummary/OrderSummary';
 import Spinner from '../../components/UI/Spinner/Spinner';
 
-import axios from '../../axios-orders';
 import errorHandler from '../../hoc/errorHandler/errorHandler';
 
 class BurgerBuilder extends Component {
     state = {
         purchasing: false,
-        loading: false,
-        error: false,
     };
 
     componentDidMount() {
-        // Fetch ingredients from firebase DB
-        // axios
-        //     .get("https://burger-builder-77b5d.firebaseio.com/ingredients.json")
-        //     .then((response) => {
-        //         this.setState({ ingredients: response.data });
-        //     })
-        //     .catch((e) => {
-        //         console.log(e);
-        //         this.setState({ error: true });
-        //     });
+        this.props.onInitIngredients();
     }
 
     updatePurchaseState = (ingredients) => {
@@ -75,7 +64,7 @@ class BurgerBuilder extends Component {
         let orderSummary = null; //initially no ingredients so no ordersummary
 
         // Assign spinner to burger comps because ingredients are fetched from DB which will take time
-        let burgerComps = this.state.error ? <p style={{ textAlign: 'center' }}>Failed Loading Ingredients...</p> : <Spinner />;
+        let burgerComps = this.props.error ? <p style={{ textAlign: 'center' }}>Failed Loading Ingredients...</p> : <Spinner />; //redux props passed
 
         if (this.props.ings) {
             // When the ingredients are fetched assign burger components
@@ -102,11 +91,6 @@ class BurgerBuilder extends Component {
                 />
             );
         }
-
-        if (this.state.loading) {
-            orderSummary = <Spinner />;
-        }
-
         return (
             <Aux>
                 <Modal show={this.state.purchasing} modalClosed={this.purchaseCancelHandler}>
@@ -122,15 +106,17 @@ class BurgerBuilder extends Component {
 const importReduxState = (state) => {
     //Import state obj set in redux
     return {
-        ings: state.ingredients,
-        price: state.totalPrice,
+        ings: state.burgerBuilderReducer.ingredients,
+        price: state.burgerBuilderReducer.totalPrice,
+        error: state.burgerBuilderReducer.error,
     };
 };
 
 const exportReactProps = (dispatch) => {
     return {
-        onIngredientAdded: (ingName) => dispatch({ type: actionTypes.ADD_INGREDIENT, ingredientName: ingName }),
-        onIngredientDeleted: (ingName) => dispatch({ type: actionTypes.REMOVE_INGREDIENT, ingredientName: ingName }),
+        onInitIngredients: () => dispatch(burgerBuilderActions.initIngredients()),
+        onIngredientAdded: (ingName) => dispatch(burgerBuilderActions.addIngredient(ingName)),
+        onIngredientDeleted: (ingName) => dispatch(burgerBuilderActions.removeIngredient(ingName)),
     };
 };
 

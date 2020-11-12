@@ -2,10 +2,14 @@ import React, { Component } from 'react';
 import { withRouter } from 'react-router';
 import { connect } from 'react-redux';
 
+// Redux Actions
+import * as contactActions from '../../../redux/actions/index';
+
 import axios from '../../../axios-orders';
 import Button from '../../../components/UI/Button/Button';
 import Input from '../../../components/UI/Input/Input';
 import Spinner from '../../../components/UI/Spinner/Spinner';
+import withErrorHandler from '../../../hoc/errorHandler/errorHandler';
 
 import classes from './ContactData.css';
 
@@ -100,14 +104,10 @@ class ContactData extends Component {
             },
         },
         formIsValid: false,
-        loading: false,
     };
 
     orderHandler = (event) => {
         event.preventDefault();
-        this.setState({
-            loading: true,
-        });
 
         const formData = {};
 
@@ -121,20 +121,7 @@ class ContactData extends Component {
             orderData: formData,
         };
 
-        axios
-            .post('/orders.json', order)
-            .then((res) => {
-                this.setState({
-                    loading: false,
-                });
-                this.props.history.push('/');
-            })
-            .catch((e) => {
-                console.log(e);
-                this.setState({
-                    loading: false,
-                });
-            });
+        this.props.onOrder(order); //Redux
     };
 
     inputChangedHandler = (event, inputIdentifier) => {
@@ -150,8 +137,6 @@ class ContactData extends Component {
         for (let input in updatedForm) {
             formIsValid = updatedForm[input].valid && formIsValid;
         }
-
-        console.log(formIsValid);
 
         this.setState({
             orderForm: updatedForm,
@@ -205,7 +190,7 @@ class ContactData extends Component {
             </form>
         );
 
-        if (this.state.loading) {
+        if (this.props.loading) {
             form = <Spinner />;
         }
 
@@ -221,9 +206,17 @@ class ContactData extends Component {
 const importReduxState = (state) => {
     //Import state obj set in redux
     return {
-        ings: state.ingredients,
-        price: state.totalPrice,
+        ings: state.burgerBuilderReducer.ingredients,
+        price: state.burgerBuilderReducer.totalPrice,
+        loading: state.orderReducer.loading,
+        purchased: state.orderReducer.purchased,
     };
 };
 
-export default connect(importReduxState)(withRouter(ContactData));
+const exportReactProps = (dispatch) => {
+    return {
+        onOrder: (orderData) => dispatch(contactActions.purchaseBurger(orderData)),
+    };
+};
+
+export default connect(importReduxState, exportReactProps)(withErrorHandler(ContactData, axios));
