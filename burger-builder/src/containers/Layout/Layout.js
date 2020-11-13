@@ -1,9 +1,12 @@
-import React, { Component } from "react";
-import Aux from "../../hoc/Auxilary/Auxilary";
-import classes from "./Layout.css";
+import React, { Component } from 'react';
+import Aux from '../../hoc/Auxilary/Auxilary';
+import classes from './Layout.css';
 
-import Toolbar from "../../components/Navigation/Toolbar/Toolbar";
-import SideDrawer from "../../components/Navigation/SideDrawer/SideDrawer";
+// Redux
+import { connect } from 'react-redux';
+
+import Toolbar from '../../components/Navigation/Toolbar/Toolbar';
+import SideDrawer from '../../components/Navigation/SideDrawer/SideDrawer';
 
 class Layout extends Component {
     state = {
@@ -21,15 +24,18 @@ class Layout extends Component {
     render() {
         return (
             <Aux>
-                <Toolbar sidebarOpen={this.sideDrawerOpenHandler} />
-                <SideDrawer
-                    open={this.state.showSideDrawer}
-                    closed={this.sideDrawerClosedHandler}
-                />
+                <Toolbar sidebarOpen={this.sideDrawerOpenHandler} isAuth={this.props.isAuthenticated} />
+                <SideDrawer open={this.state.showSideDrawer} closed={this.sideDrawerClosedHandler} isAuth={this.props.isAuthenticated} />
                 <main className={classes.Content}>{this.props.children}</main>
             </Aux>
         );
     }
 }
 
-export default Layout;
+const importReduxState = (state) => {
+    return {
+        isAuthenticated: state.authReducer.token !== null,
+    };
+};
+
+export default connect(importReduxState)(Layout);

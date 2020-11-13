@@ -121,7 +121,7 @@ class ContactData extends Component {
             orderData: formData,
         };
 
-        this.props.onOrder(order); //Redux
+        this.props.onOrder(order, this.props.token); //Redux
     };
 
     inputChangedHandler = (event, inputIdentifier) => {
@@ -210,12 +210,13 @@ const importReduxState = (state) => {
         price: state.burgerBuilderReducer.totalPrice,
         loading: state.orderReducer.loading,
         purchased: state.orderReducer.purchased,
+        token: state.authReducer.token,
     };
 };
 
 const exportReactProps = (dispatch) => {
     return {
-        onOrder: (orderData) => dispatch(contactActions.purchaseBurger(orderData)),
+        onOrder: (orderData, token) => dispatch(contactActions.purchaseBurger(orderData, token)),
     };
 };
 

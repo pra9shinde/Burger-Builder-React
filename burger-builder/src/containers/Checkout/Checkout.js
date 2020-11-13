@@ -7,10 +7,6 @@ import ContactData from './contactData/ContactData';
 import * as actions from './../../redux/actions/index';
 
 class Checkout extends Component {
-    componentDidMount() {
-        this.props.onInitPurchase();
-    }
-
     checkoutCancelledHandler = () => {
         this.props.history.goBack(); //Send back to home page
     };
@@ -51,10 +47,4 @@ const importReduxState = (state) => {
     };
 };
 
-const exportReactProps = (dispatch) => {
-    return {
-        onInitPurchase: () => dispatch(actions.purchaseInit()),
-    };
-};
-
-export default connect(importReduxState, exportReactProps)(Checkout);
+export default connect(importReduxState)(Checkout);

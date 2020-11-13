@@ -1,53 +1,25 @@
-import React, { Component } from "react";
+import React, { Component } from 'react';
 
-import Order from "../../components/Order/Order";
-import axios from "../../axios-orders";
-import errorHandler from "../../hoc/errorHandler/errorHandler";
-import Spinner from "../../components/UI/Spinner/Spinner";
+import { connect } from 'react-redux';
+
+import Order from '../../components/Order/Order';
+import axios from '../../axios-orders';
+import witherrorHandler from '../../hoc/errorHandler/errorHandler';
+import Spinner from '../../components/UI/Spinner/Spinner';
+
+import * as actions from '../../redux/actions/index';
 
 class Orders extends Component {
-    state = {
-        orders: [],
-        loading: true,
-    };
-
     componentDidMount() {
-        axios
-            .get("/orders.json")
-            .then((res) => {
-                // convert object to arr
-                const fetchedOrders = [];
-                for (let key in res.data) {
-                    fetchedOrders.push({
-                        ...res.data[key],
-                        id: key,
-                    });
-                }
-
-                this.setState({
-                    loading: false,
-                    orders: fetchedOrders,
-                });
-            })
-            .catch((e) => {
-                this.setState({
-                    loading: false,
-                });
-            });
+        this.props.onFetchOrders(this.props.token);
     }
 
     render() {
-        let orders = this.state.orders.map((order) => {
-            return (
-                <Order
-                    ingredients={order.ingredients}
-                    price={order.price}
-                    key={order.id}
-                />
-            );
+        let orders = this.props.orders.map((order) => {
+            return <Order ingredients={order.ingredients} price={order.price} key={order.id} />;
         });
 
-        if (this.state.loading) {
+        if (this.props.loading) {
             orders = <Spinner />;
         }
 
@@ -55,4 +27,18 @@ class Orders extends Component {
     }
 }
 
-export default errorHandler(Orders, axios);
+const importReduxState = (state) => {
+    return {
+        orders: state.orderReducer.orders,
+        loading: state.orderReducer.fetchOrdersLoading,
+        token: state.authReducer.token,
+    };
+};
+
+const exportReactProps = (dispatch) => {
+    return {
+        onFetchOrders: (token) => dispatch(actions.fetchOrdersDB(token)),
+    };
+};
+
+export default connect(importReduxState, exportReactProps)(witherrorHandler(Orders, axios));

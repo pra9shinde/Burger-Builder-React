@@ -3,7 +3,7 @@ import axios from '../../axios-orders';
 
 // Redux
 import { connect } from 'react-redux';
-import * as burgerBuilderActions from '../../redux/actions/index';
+import * as actions from '../../redux/actions/index';
 
 // Higher Order Component
 import Aux from '../../hoc/Auxilary/Auxilary';
@@ -45,6 +45,7 @@ class BurgerBuilder extends Component {
     };
 
     purchaseContinueHandler = () => {
+        this.props.onInitPurchase();
         this.props.history.push('/checkout'); //Route to checkout page
     };
 
@@ -114,9 +115,10 @@ const importReduxState = (state) => {
 
 const exportReactProps = (dispatch) => {
     return {
-        onInitIngredients: () => dispatch(burgerBuilderActions.initIngredients()),
-        onIngredientAdded: (ingName) => dispatch(burgerBuilderActions.addIngredient(ingName)),
-        onIngredientDeleted: (ingName) => dispatch(burgerBuilderActions.removeIngredient(ingName)),
+        onInitIngredients: () => dispatch(actions.initIngredients()),
+        onIngredientAdded: (ingName) => dispatch(actions.addIngredient(ingName)),
+        onIngredientDeleted: (ingName) => dispatch(actions.removeIngredient(ingName)),
+        onInitPurchase: () => dispatch(actions.purchaseInit()),
     };
 };
 
