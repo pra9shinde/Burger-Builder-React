@@ -17,7 +17,8 @@ import Spinner from '../../components/UI/Spinner/Spinner';
 
 import errorHandler from '../../hoc/errorHandler/errorHandler';
 
-class BurgerBuilder extends Component {
+// export is just used in test.js for testing
+export class BurgerBuilder extends Component {
     state = {
         purchasing: false,
     };
@@ -39,9 +40,12 @@ class BurgerBuilder extends Component {
     };
 
     purchaseHandler = () => {
-        this.setState({
-            purchasing: true,
-        });
+        if (this.props.isAuthenticated) {
+            this.setState({ purchasing: true });
+        } else {
+            this.props.onSetAuthRedirect('/checkout');
+            this.props.history.push('/auth');
+        }
     };
 
     purchaseContinueHandler = () => {
@@ -79,6 +83,7 @@ class BurgerBuilder extends Component {
                         price={this.props.price} //Received from Redux
                         purchasable={this.updatePurchaseState(this.props.ings)}
                         ordered={this.purchaseHandler}
+                        isAuthenticated={this.props.isAuthenticated} //Redux
                     />
                 </Aux>
             );
@@ -110,6 +115,7 @@ const importReduxState = (state) => {
         ings: state.burgerBuilderReducer.ingredients,
         price: state.burgerBuilderReducer.totalPrice,
         error: state.burgerBuilderReducer.error,
+        isAuthenticated: state.authReducer.token !== null,
     };
 };
 
@@ -119,6 +125,7 @@ const exportReactProps = (dispatch) => {
         onIngredientAdded: (ingName) => dispatch(actions.addIngredient(ingName)),
         onIngredientDeleted: (ingName) => dispatch(actions.removeIngredient(ingName)),
         onInitPurchase: () => dispatch(actions.purchaseInit()),
+        onSetAuthRedirect: (path) => dispatch(actions.setAuthRedirect(path)),
     };
 };
 

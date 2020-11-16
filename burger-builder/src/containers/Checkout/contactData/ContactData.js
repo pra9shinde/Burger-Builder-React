@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { withRouter } from 'react-router';
 import { connect } from 'react-redux';
 
 // Redux Actions
@@ -119,6 +118,7 @@ class ContactData extends Component {
             ingredients: this.props.ings,
             price: this.props.price,
             orderData: formData,
+            userId: this.props.userId,
         };
 
         this.props.onOrder(order, this.props.token); //Redux
@@ -211,6 +211,7 @@ const importReduxState = (state) => {
         loading: state.orderReducer.loading,
         purchased: state.orderReducer.purchased,
         token: state.authReducer.token,
+        userId: state.authReducer.userId,
     };
 };
 

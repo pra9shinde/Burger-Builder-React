@@ -11,7 +11,7 @@ import * as actions from '../../redux/actions/index';
 
 class Orders extends Component {
     componentDidMount() {
-        this.props.onFetchOrders(this.props.token);
+        this.props.onFetchOrders(this.props.token, this.props.userId);
     }
 
     render() {
@@ -32,12 +32,13 @@ const importReduxState = (state) => {
         orders: state.orderReducer.orders,
         loading: state.orderReducer.fetchOrdersLoading,
         token: state.authReducer.token,
+        userId: state.authReducer.userId,
     };
 };
 
 const exportReactProps = (dispatch) => {
     return {
-        onFetchOrders: (token) => dispatch(actions.fetchOrdersDB(token)),
+        onFetchOrders: (token, userId) => dispatch(actions.fetchOrdersDB(token, userId)),
     };
 };
 

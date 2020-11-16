@@ -1,13 +1,9 @@
 import React, { Component } from 'react';
-import { BrowserRouter, Route } from 'react-router-dom';
-import { Provider } from 'react-redux';
-import { createStore, applyMiddleware, compose, combineReducers } from 'redux';
-import thunk from 'redux-thunk';
+import { Route, withRouter, Redirect, Switch } from 'react-router-dom';
+import { connect } from 'react-redux';
 
 // Redux
-import burgerBuilderReducer from './redux/reducer/burgerBuilder';
-import orderReducer from './redux/reducer/order';
-import authReducer from './redux/reducer/auth';
+import * as actions from './redux/actions/index';
 
 // Components
 import Layout from './containers/Layout/Layout';
@@ -17,38 +13,55 @@ import Orders from './containers/Orders/Orders';
 import Auth from './containers/Auth/Auth';
 import Logout from './containers/Auth/Logout/Logout';
 
-const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose; //advance devtools coz we use thunk & middleware for async code
-
-// Combine Reducers
-const rootReducer = combineReducers({
-    burgerBuilderReducer: burgerBuilderReducer,
-    orderReducer: orderReducer,
-    authReducer: authReducer,
-});
-
-// Second arg is for redux dev
-const store = createStore(rootReducer, composeEnhancers(applyMiddleware(thunk))); //Wrap Redux to React
-
 class App extends Component {
+    componentDidMount() {
+        this.props.onTryAutoSignup();
+    }
+
     render() {
+        let routes = (
+            <Switch>
+                <Route path='/auth' component={Auth} />
+                <Route path='/' exact component={BurgerBuilder} />
+                <Redirect to='/' /> {/* Unknown URL redirect to home */}
+            </Switch>
+        );
+
+        if (this.props.isAuthenticated) {
+            routes = (
+                <Switch>
+                    <Route path='/checkout' component={Checkout} />
+                    <Route path='/orders' component={Orders} />
+                    <Route path='/logout' component={Logout} />
+                    <Route path='/auth' component={Auth} />
+                    <Route path='/' exact component={BurgerBuilder} />
+                    <Redirect to='/' />
+                </Switch>
+            );
+        }
+
         return (
-            <Provider store={store}>
-                <BrowserRouter>
-                    <Layout>
-                        <Route path='/checkout' component={Checkout} />
-                        <Route path='/orders' component={Orders} />
-                        <Route path='/auth' component={Auth} />
-                        <Route path='/logout' component={Logout} />
-                        <Route path='/' exact component={BurgerBuilder} />
-                        {/* 
+            <Layout>
+                {routes}
+                {/* 
                         <BurgerBuilder />
                         <Checkout /> 
                     */}
-                    </Layout>
-                </BrowserRouter>
-            </Provider>
+            </Layout>
         );
     }
 }
 
-export default App;
+const importReduxState = (state) => {
+    return {
+        isAuthenticated: state.authReducer.token !== null,
+    };
+};
+
+const exportReactProps = (dispatch) => {
+    return {
+        onTryAutoSignup: () => dispatch(actions.authCheckState()),
+    };
+};
+
+export default withRouter(connect(importReduxState, exportReactProps)(App));
